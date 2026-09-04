@@ -8,8 +8,65 @@ function field(label,id,val="",type="text",opts=[]){return `<div class="field"><
 async function boot(){let x=await api("/me");if(!x.user)return login();me=x.user;classes=await api("/classes");subjects=await api("/subjects");exams=await api("/exams");layout();show("Dashboard")}
 function login(){document.getElementById("app").innerHTML=`<div class="login"><div class="loginbox"><h1>🏫 Kapnanda School</h1><p class="muted">Primary & Junior School Management System</p><input id="u" placeholder="Username" value="admin"><input id="p" type="password" placeholder="Password" value="Admin@123"><button onclick="doLogin()">Sign in</button><p class="muted">Initial login: admin / Admin@123. Change it before real use.</p><div id="err"></div></div></div>`}
 async function doLogin(){try{let x=await api("/login",{method:"POST",body:JSON.stringify({username:u.value,password:p.value})});me=x.user;classes=await api("/classes");subjects=await api("/subjects");exams=await api("/exams");layout();show("Dashboard")}catch(e){document.getElementById("err").textContent=e.message}}
-function layout(){document.getElementById("app").innerHTML=`<div class="app"><aside class="side"><div class="brand">KAPNANDA PRIMARY & JUNIOR SCHOOL<small>Management System • PP1–Grade 9</small></div><div class="nav">${pages.map(p=>`<button data-p="${p}" onclick="show('${p}')">${icons[p]} ${p}</button>`).join("")}</div><button class="secondary" style="width:100%;margin-top:15px" onclick="logout()">Log out</button></aside><main class="main"><div class="top"><div><h1 id="title"></h1><div class="muted">Term 3 • 2026</div></div><div class="toolbar no-print"><button onclick="window.print()">Print</button>${me.role==="ADMIN"?`<button onclick="backup()">Backup</button>`:""}</div></div><div id="content"></div></main></div>`}
-async function logout(){await api("/logout",{method:"POST"});location.reload()}
+function layout(){
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const month = now.getMonth() + 1;
+
+  let currentTerm;
+
+  if(month >= 1 && month <= 4){
+    currentTerm = "Term 1";
+  }else if(month >= 5 && month <= 8){
+    currentTerm = "Term 2";
+  }else{
+    currentTerm = "Term 3";
+  }
+
+  document.getElementById("app").innerHTML=`
+    <div class="app">
+      <aside class="side">
+        <div class="brand">
+          KAPNANDA PRIMARY & JUNIOR SCHOOL
+          <small>Management System • PP1–Grade 9</small>
+        </div>
+
+        <div class="nav">
+          ${pages.map(p=>`
+            <button data-p="${p}" onclick="show('${p}')">
+              ${icons[p]} ${p}
+            </button>
+          `).join("")}
+        </div>
+
+        <button class="secondary" style="width:100%;margin-top:15px" onclick="logout()">
+          Log out
+        </button>
+      </aside>
+
+      <main class="main">
+        <div class="top">
+          <div>
+            <h1 id="title"></h1>
+            <div class="muted">${currentTerm} • ${currentYear}</div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button onclick="window.print()">Print</button>
+            ${me.role==="ADMIN"?`<button onclick="backup()">Backup</button>`:""}
+          </div>
+        </div>
+
+        <div id="content"></div>
+      </main>
+    </div>
+  `;
+}
+
+async function logout(){
+  await api("/logout",{method:"POST"});
+  location.reload();
+}
 async function show(p){document.getElementById("title").textContent=p;document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.p===p));try{await ({Dashboard,Learners,Teachers,Exams,Marks,Rankings,Fees,Timetable,Attendance,Reports,Performance,Settings}[p])()}catch(e){alert(e.message)}}
 async function Dashboard(){let d=await api("/dashboard");document.getElementById("content").innerHTML=`<div class="grid">${stat("Learners",d.learners)}${stat("Teachers",d.teachers)}${stat("Fees Collected","KSh "+d.paid.toLocaleString())}${stat("Outstanding","KSh "+d.balance.toLocaleString())}</div><div class="two"><div class="card"><h2>Learners by Class</h2><div class="chart"><canvas id="c1"></canvas></div></div><div class="card"><h2>Fees Position</h2><div class="chart"><canvas id="c2"></canvas></div></div></div><div class="card"><h2>Quick Actions</h2><div class="toolbar"><button onclick="show('Learners')">Add Learner</button><button onclick="show('Marks')">Enter Marks</button><button onclick="show('Fees')">Record Fees</button><button onclick="show('Timetable')">Timetable</button><button onclick="show('Reports')">Reports</button></div></div>`;new Chart(c1,{type:"bar",data:{labels:d.classes.map(x=>x.name),datasets:[{label:"Learners",data:d.classes.map(x=>x.count)}]},options:{responsive:true,maintainAspectRatio:false}});new Chart(c2,{type:"doughnut",data:{labels:["Collected","Outstanding"],datasets:[{data:[d.paid,d.balance]}]},options:{responsive:true,maintainAspectRatio:false}})}
 function stat(a,b){return `<div class="card stat"><h3>${a}</h3><b>${b}</b></div>`}
