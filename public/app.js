@@ -20,7 +20,30 @@ async function Teachers(){let ts=await api("/teachers");document.getElementById(
 function teacherForm(){modal(`<h2>Add Teacher</h2><div class="form">${field("Staff number","ts","")}${field("Name","tn","")}${field("Phone","tp","")}${field("Email","te","")}</div><button onclick="saveTeacher()">Save</button>`)}
 async function saveTeacher(){await api("/teachers",{method:"POST",body:JSON.stringify({staff_no:ts.value,name:tn.value,phone:tp.value,email:te.value})});closeModal();Teachers()}
 async function Exams(){exams=await api("/exams");document.getElementById("content").innerHTML=`<div class="card"><div class="toolbar" style="justify-content:space-between"><h2>Examinations</h2><button onclick="examForm()">+ New Exam</button></div><table class="table"><tr><th>Name</th><th>Term</th><th>Year</th></tr>${exams.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.term)}</td><td>${x.year}</td></tr>`).join("")}</table></div>`}
-function examForm(){modal(`<h2>New Examination</h2><div class="form">${field("Name","en","Term 3 Assessment 2026")}${field("Term","et","Term 3")}${field("Year","ey","2026","number")}</div><button onclick="saveExam()">Save</button>`)}
+function examForm(){
+  const currentYear = new Date().getFullYear();
+
+  modal(`
+    <h2>New Examination</h2>
+    <div class="form">
+
+      ${field("Name","en","Term 1 Assessment " + currentYear)}
+
+      <label>Term</label>
+      <select id="et">
+        <option value="Term 1">Term 1</option>
+        <option value="Term 2">Term 2</option>
+        <option value="Term 3">Term 3</option>
+      </select>
+
+      <label>Year</label>
+      <input id="ey" type="number" value="${currentYear}" min="2020" max="2100">
+
+    </div>
+
+    <button onclick="saveExam()">Save</button>
+  `);
+}
 async function saveExam(){await api("/exams",{method:"POST",body:JSON.stringify({name:en.value,term:et.value,year:ey.value})});closeModal();Exams()}
 function selectHtml(id,arr,label){return `<select id="${id}"><option value="">${label}</option>${arr.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("")}</select>`}
 async function Marks(){exams=await api("/exams");document.getElementById("content").innerHTML=`<div class="card"><h2>Marks Entry</h2><div class="form"><div class="field"><label>Examination</label>${selectHtml("mx",exams,"Select exam")}</div><div class="field"><label>Class</label>${selectHtml("mc",classes,"Select class")}</div><div class="field"><label>Subject</label><select id="ms"><option>Select class first</option></select></div></div><button onclick="loadMarkGrid()">Load Learners</button><div id="mg" style="margin-top:15px"></div></div>`;mc.onchange=()=>{let c=classes.find(x=>x.id==mc.value);let section=c?.section;ms.innerHTML=subjects.filter(s=>s.section===section).map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("")}}
