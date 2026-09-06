@@ -1,15 +1,17 @@
-# Kapnanda Primary and Junior School Management System
+# Kapnanda Primary and Junior School
 
-GitHub Pages-ready school management system for **Kapnanda Primary and Junior School**.
+GitHub-ready Supabase school management system, rebranded as a separate school deployment.
 
-## Upload to GitHub
-1. Create a new repository.
-2. Upload the contents of this folder.
-3. Enable **GitHub Pages** from Settings → Pages → Deploy from branch.
-4. Open the deployed site and configure Supabase from the login screen.
+## Included
+- `index.html` — school management application
+- `supabase/supabase-schema.sql` — database schema
+- `SUPABASE-SETUP.md` — setup instructions
 
-## Supabase
-Run `supabase/supabase-schema.sql` in Supabase SQL Editor, then create the administrator in Supabase Authentication → Users. Use the publishable/anon key in the website; never expose a service-role key.
+## Deployment
+1. Create/open the Supabase project.
+2. Run the SQL schema in Supabase SQL Editor.
+3. Upload this folder to GitHub.
+4. Enable GitHub Pages (or serve `index.html` from your preferred static host).
 
-## School identity
-All Tinet branding, titles, local-storage keys, backup names, documentation, and school-specific labels have been changed so this is a separate system for Kapnanda Primary and Junior School.
+## Security
+Only the Supabase publishable key belongs in browser code. Never commit a `sb_secret_...` key.
