@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tinet Primary and Junior School Management System</title>
+<title> Kapnanda Primary and Junior School Management System</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -87,7 +87,7 @@ function save(){localStorage.setItem(KEY,JSON.stringify(db));if(cloudReady)cloud
 async function cloudLogout(){if(cloud)await cloud.auth.signOut();cloudReady=false;cloudUser=null}
 /* ---------- End Supabase cloud connection ---------- */
 
-const KEY="tinet_sms_v2";
+const KEY="kapnanda_sms_v2";
 const classes=["PP1","PP2","Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9"];
 const ecde=["PP1","PP2"], lower=["Grade 1","Grade 2","Grade 3"], upper=["Grade 4","Grade 5","Grade 6"], junior=["Grade 7","Grade 8","Grade 9"];
 const days=["Monday","Tuesday","Wednesday","Thursday","Friday"];
@@ -106,7 +106,7 @@ PP2:["Language Activities","Mathematical Activities","Environmental Activities",
 };
 const defaultFreq={Mathematics:5,English:5,"Integrated Science":5,Kiswahili:4,Agriculture:4,"Social Studies":4,"Creative Arts & Sports":4,"Pre-Technical Studies":4,"Religious Education":4,"Science & Technology":5};
 let db=JSON.parse(localStorage.getItem(KEY)||"null");
-if(!db) db={settings:{school:"Tinet Primary and Junior School",motto:"Learn • Grow • Excel",term:"Term 3",year:"2026",phone:"0718134443",email:"",initialPasswordChanged:false},users:[{username:"admin",password:"Tinet123",role:"Super Administrator"}],learners:[],teachers:[],payments:[],marks:[],exams:[{id:"EX1",name:"Term 3 Assessment 2026",term:"Term 3",year:"2026"}],attendance:[],timetable:[],subjects:JSON.parse(JSON.stringify(defaultSubjects)),subjectConfigs:{},fees:{byPeriod:{},legacy:{ECDE:{PP1:0,PP2:0},Primary:{},Junior:{}}},audit:[],academicPeriods:[{year:"2026",term:"Term 3",status:"Open"}]};
+if(!db) db={settings:{school:"Kapnanda Primary and Junior School",motto:"Learn • Grow • Excel",term:"Term 3",year:"2026",phone:"0718134443",email:"",initialPasswordChanged:false},users:[{username:"admin",password:"Tinet123",role:"Super Administrator"}],learners:[],teachers:[],payments:[],marks:[],exams:[{id:"EX1",name:"Term 3 Assessment 2026",term:"Term 3",year:"2026"}],attendance:[],timetable:[],subjects:JSON.parse(JSON.stringify(defaultSubjects)),subjectConfigs:{},fees:{byPeriod:{},legacy:{ECDE:{PP1:0,PP2:0},Primary:{},Junior:{}}},audit:[],academicPeriods:[{year:"2026",term:"Term 3",status:"Open"}]};
 if(!db.subjectConfigs) db.subjectConfigs={};
 if(!db.fees) db.fees={};
 // Preserve V1 fee values before introducing the new by-period structure.
@@ -223,7 +223,7 @@ if(cloudConfigured()){initCloud();document.getElementById("loginMode").textConte
 </script>
 
 <script>
-/* ========================= TINET V3 =========================
+/* ========================= KAPNANDA V3 =========================
    Built after inspecting the V2 logic. V2 kept the subject selector from its
    initial class and its timetable assigned one selected teacher to every lesson.
    V3 adds period-complete subjects, explicit teaching loads and a section-wide
@@ -232,7 +232,7 @@ if(cloudConfigured()){initCloud();document.getElementById("loginMode").textConte
 (function migrateV3(){
   if(!db.teacherLoads) db.teacherLoads=[];
   if(!db.timetableMeta) db.timetableMeta={version:3};
-  if(!db.settings.school || /kapnanda/i.test(db.settings.school)) db.settings.school="Tinet Primary and Junior School";
+  if(!db.settings.school || /kapnanda/i.test(db.settings.school)) db.settings.school="Kapnanda Primary and Junior School";
   db.teachers=(db.teachers||[]).map((t,i)=>({...t,active:t.active!==false,no:Number(t.no)||i+1}));
   const periods=(db.academicPeriods&&db.academicPeriods.length)?db.academicPeriods:[{year:db.settings.year,term:db.settings.term}];
   for(const p of periods) ensurePeriodConfigV3(String(p.year),p.term);
@@ -246,8 +246,8 @@ if(cloudConfigured()){initCloud();document.getElementById("loginMode").textConte
   save();
 })();
 function periodMatchV3(x,year=db.settings.year,term=db.settings.term){return String(x.year||year)===String(year)&&String(x.term||term)===String(term)}
-function schoolTitleForClass(c){return ecde.includes(c)?"TINET ECDE SCHOOL":junior.includes(c)?"TINET JUNIOR SCHOOL":"TINET PRIMARY SCHOOL"}
-function schoolTitleForSection(sec){return sec==="ECDE"?"TINET ECDE SCHOOL":sec==="Junior"?"TINET JUNIOR SCHOOL":"TINET PRIMARY SCHOOL"}
+function schoolTitleForClass(c){return ecde.includes(c)?"KAPNANDA ECDE SCHOOL":junior.includes(c)?"KAPNANDA JUNIOR SCHOOL":"KAPNANDA PRIMARY SCHOOL"}
+function schoolTitleForSection(sec){return sec==="ECDE"?"KAPNANDA ECDE SCHOOL":sec==="Junior"?"KAPNANDA JUNIOR SCHOOL":"KAPNANDA PRIMARY SCHOOL"}
 function sectionClasses(sec){return sec==="ECDE"?ecde:sec==="Lower Primary"?lower:sec==="Upper Primary"?upper:sec==="Junior"?junior:classes}
 function parseTeacherTextV3(s){return String(s||"").split(/[,;|]+/).map(x=>x.trim()).filter(Boolean)}
 function ensurePeriodConfigV3(year=db.settings.year,term=db.settings.term){
