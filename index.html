@@ -173,6 +173,7 @@ async function login(){
    audit("Logged in");if(!db.settings.initialPasswordChanged)securitySetup(true);else show("Dashboard");
  }
 }
+ const SUPABASE_KEY = 'sb_publishable_-gWNnPJDlA8TrAJmQo6h5g_KPbjIiep';
 async function logout(){audit("Logged out");await cloudLogout();currentUser=null;document.getElementById("app").classList.add("hidden");document.getElementById("login").classList.remove("hidden");document.getElementById("loginPass").value=""}
 function forgot(){openModal(`<h2>Password Recovery</h2><p>This prototype is prepared for secure SMS/USSD provider integration. Enter the registered phone number.</p>${field("Registered phone","phone","0718134443")}<div class="toolbar"><button onclick="sendOtp()">Send OTP</button><button class="secondary" onclick="closeModal()">Cancel</button></div><p class="small">For live deployment, connect an SMS/USSD provider through the backend. The browser will not fake an SMS.</p>`)}
 function sendOtp(){let phone=v("phone");if(phone!==db.settings.phone){toast("Phone number does not match the registered recovery number");return}let otp=String(Math.floor(100000+Math.random()*900000));sessionStorage.setItem("tinet_reset_otp",otp);openModal(`<h2>OTP Verification</h2><p>OTP generated for provider integration.</p>${field("OTP","otp")}<div class="toolbar"><button onclick="verifyOtp()">Verify</button></div><p class="small">Demo mode OTP: <b>${otp}</b>. In production this value must only be delivered by the configured SMS provider.</p>`)}
