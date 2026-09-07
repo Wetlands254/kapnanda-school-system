@@ -27,7 +27,7 @@
 <div id="login" class="login">
  <div class="loginbox">
   <div class="logo">T</div>
-  <h1>Tinet Primary and Junior School</h1>
+  <h1>Kapnanda Primary and Junior School</h1>
   <p>School Management System</p>
   <div class="field"><label id="loginUserLabel">Username / Email</label><input id="loginUser" value="admin"></div>
   <div class="field" style="margin-top:12px"><label>Password</label><input id="loginPass" type="password"></div>
@@ -40,7 +40,7 @@
 
 <div id="app" class="app hidden">
 <aside class="sidebar">
- <div class="brand">TIN​ET PRIMARY & JUNIOR SCHOOL<small>School Management System</small></div>
+ <div class="brand">KAPNANDA PRIMARY & JUNIOR SCHOOL<small>School Management System</small></div>
  <div class="sectiontag">Main</div><div class="nav">
   <button data-page="Dashboard" onclick="show('Dashboard')">🏠 Dashboard</button>
   <button data-page="Learners" onclick="show('Learners')">👨‍🎓 Learners</button>
@@ -73,7 +73,7 @@
 
 <script>
 /* ---------- Supabase cloud connection ---------- */
-const CLOUD_KEY="tinet_supabase_config_v1";
+const CLOUD_KEY="kapnanda_supabase_config_v1";
 let cloud=null, cloudReady=false, cloudUser=null, cloudSyncBusy=false;
 function getCloudConfig(){try{return JSON.parse(localStorage.getItem(CLOUD_KEY)||"null")}catch(e){return null}}
 function cloudConfigured(){const c=getCloudConfig();return !!(c?.url&&c?.anonKey&&c.url.startsWith("http"))}
