@@ -72,21 +72,50 @@
 <div id="modal" class="modal hidden"><div class="modalbox" id="modalBody"></div></div><div id="toast" class="toast"></div>
 
 <script>
-/* ---------- Supabase cloud connection ---------- */
-const CLOUD_KEY="kapnanda_supabase_config_v1";
-let cloud=null, cloudReady=false, cloudUser=null, cloudSyncBusy=false;
-function getCloudConfig(){try{return JSON.parse(localStorage.getItem(CLOUD_KEY)||"null")}catch(e){return null}}
-function cloudConfigured(){const c=getCloudConfig();return !!(c?.url&&c?.anonKey&&c.url.startsWith("http"))}
-function initCloud(){if(!cloudConfigured()||!window.supabase)return false;const c=getCloudConfig();try{cloud=window.supabase.createClient(c.url,c.anonKey);return true}catch(e){console.error(e);return false}}
-function cloudSetup(){const c=getCloudConfig()||{url:"",anonKey:""};openModal(`<h2>Supabase Cloud Setup</h2><p>Paste your Supabase <b>Project URL</b> and <b>Publishable/anon key</b>. Never paste the service-role key into this website.</p>${field("Project URL","surl",c.url)}${field("Publishable / anon key","skey",c.anonKey)}<div class="toolbar"><button onclick="saveCloudSetup()">Save & Connect</button><button class="secondary" onclick="closeModal()">Cancel</button></div><p class="small">Then create an Auth user in Supabase (Authentication → Users) and sign in with that email and password.</p>`)}
-function saveCloudSetup(){const url=v("surl").trim().replace(/\/$/,""),anonKey=v("skey").trim();if(!url||!anonKey||!url.startsWith("http")){toast("Enter a valid Supabase URL and anon key");return}localStorage.setItem(CLOUD_KEY,JSON.stringify({url,anonKey}));if(initCloud()){document.getElementById("loginMode").textContent="Supabase mode — cloud authentication and storage enabled.";document.getElementById("loginUserLabel").textContent="Supabase Email";toast("Supabase configured");closeModal()}else toast("Could not initialize Supabase")}
-async function cloudLogin(email,password){if(!initCloud())return{error:"Supabase is not configured"};const {data,error}=await cloud.auth.signInWithPassword({email,password});if(error)return{error:error.message};cloudUser=data.user;return{data}}
-async function cloudLoad(){if(!cloud||!cloudUser)return false;const {data,error}=await cloud.from("school_state").select("data").eq("owner_id",cloudUser.id).maybeSingle();if(error){console.error(error);toast("Cloud read failed: "+error.message);return false}if(data?.data){db=data.data;localStorage.setItem(KEY,JSON.stringify(db))}else await cloudSave(true);return true}
-async function cloudSave(force=false){if(!cloud||!cloudUser||cloudSyncBusy)return;cloudSyncBusy=true;try{const {error}=await cloud.from("school_state").upsert({owner_id:cloudUser.id,data:db,updated_at:new Date().toISOString()},{onConflict:"owner_id"});if(error){console.error(error);if(force)toast("Cloud save failed: "+error.message)}}finally{cloudSyncBusy=false}}
-function save(){localStorage.setItem(KEY,JSON.stringify(db));if(cloudReady)cloudSave(false)}
-async function cloudLogout(){if(cloud)await cloud.auth.signOut();cloudReady=false;cloudUser=null}
-/* ---------- End Supabase cloud connection ---------- */
+create table if not exists public.school_state (
+  id bigint primary key,
+  data jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
 
+insert into public.school_state (id, data)
+values (1, '{}'::jsonb)
+on conflict (id) do nothing;
+
+alter table public.school_state enable row level security;
+
+drop policy if exists "Authenticated users can read school state"
+on public.school_state;
+
+drop policy if exists "Authenticated users can insert school state"
+on public.school_state;
+
+drop policy if exists "Authenticated users can update school state"
+on public.school_state;
+
+create policy "Authenticated users can read school state"
+on public.school_state
+for select
+to authenticated
+using (true);
+
+create policy "Authenticated users can insert school state"
+on public.school_state
+for insert
+to authenticated
+with check (true);
+
+create policy "Authenticated users can update school state"
+on public.school_state
+for update
+to authenticated
+using (true)
+with check (true);
+
+alter table public.school_state replica identity full;
+
+alter publication supabase_realtime
+add table public.school_state;
 const KEY="kapnanda_sms_v2";
 const classes=["PP1","PP2","Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9"];
 const ecde=["PP1","PP2"], lower=["Grade 1","Grade 2","Grade 3"], upper=["Grade 4","Grade 5","Grade 6"], junior=["Grade 7","Grade 8","Grade 9"];
