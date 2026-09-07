@@ -77,43 +77,34 @@ create table if not exists public.school_state (
   data jsonb not null default '{}'::jsonb,
   updated_at timestamptz not null default now()
 );
-
 insert into public.school_state (id, data)
 values (1, '{}'::jsonb)
 on conflict (id) do nothing;
-
 alter table public.school_state enable row level security;
-
 drop policy if exists "Authenticated users can read school state"
 on public.school_state;
 
 drop policy if exists "Authenticated users can insert school state"
 on public.school_state;
-
 drop policy if exists "Authenticated users can update school state"
 on public.school_state;
-
 create policy "Authenticated users can read school state"
 on public.school_state
 for select
 to authenticated
 using (true);
-
 create policy "Authenticated users can insert school state"
 on public.school_state
 for insert
 to authenticated
 with check (true);
-
 create policy "Authenticated users can update school state"
 on public.school_state
 for update
 to authenticated
 using (true)
 with check (true);
-
 alter table public.school_state replica identity full;
-
 alter publication supabase_realtime
 add table public.school_state;
 const KEY="kapnanda_sms_v2";
@@ -157,7 +148,6 @@ function subjectsForPeriod(c,year=db.settings.year,term=db.settings.term){const 
 function subjectRecordsFor(c,year=db.settings.year,term=db.settings.term){const k=ensurePeriodConfig(year,term);return db.subjectConfigs[k]?.[c]||[]}
 localStorage.setItem(KEY,JSON.stringify(db));
 let currentUser=null;
-
 function uid(p){return p+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 function toast(x){const t=document.getElementById("toast");t.textContent=x;t.style.display="block";setTimeout(()=>t.style.display="none",2300)}
@@ -205,7 +195,6 @@ function saveTeacher(){db.teachers.push({id:uid("T"),no:Math.max(0,...(db.teache
 function removeTeacherForm(){const opts=(db.teachers||[]).map(t=>`<option value="${esc(t.id)}">${esc(t.no?String(t.no)+" — ":"")}${esc(t.name)}${t.staff?" — "+esc(t.staff):""}</option>`).join("");if(!opts){toast("No teachers to remove");return}openModal(`<h2>Remove Teacher</h2><p class="small">Removing a teacher also removes their teaching assignments and timetable lessons. This cannot be undone.</p><div class="formgrid">${field("Teacher to remove","removeTeacherId","","select",[])}</div><div class="toolbar"><button class="danger" onclick="removeSelectedTeacher()">Remove Teacher</button><button class="secondary" onclick="closeModal()">Cancel</button></div>`);const s=document.getElementById("removeTeacherId");if(s)s.innerHTML=opts}
 function removeSelectedTeacher(){const id=v("removeTeacherId");removeTeacher(id)}
 function removeTeacher(id){const t=teacherById(id);if(!t){toast("Teacher not found");return}if(!confirm(`Remove ${t.name}? Their teaching assignments and timetable lessons will also be removed.`))return;db.teachers=(db.teachers||[]).filter(x=>x.id!==id);db.teacherLoads=(db.teacherLoads||[]).filter(x=>x.teacherId!==id);db.timetable=(db.timetable||[]).filter(x=>x.teacherId!==id && x.teacher!==t.name);save();audit("Teacher removed: "+t.name);closeModal();Teachers();toast("Teacher removed")}
-
 function Exams(){let rows=db.exams.map(e=>`<tr><td>${esc(e.name)}</td><td>${esc(e.term)}</td><td>${e.year}</td></tr>`).join("");document.getElementById("content").innerHTML=`<div class="card"><h2>Assessments</h2><div class="formgrid">${field("Assessment name","en","Term Assessment")}${field("Term","et",db.settings.term)}${field("Year","ey",db.settings.year,"number")}</div><button onclick="addExam()">Create Assessment</button><div class="tablewrap" style="margin-top:15px"><table class="table"><tr><th>Name</th><th>Term</th><th>Year</th></tr>${rows}</table></div></div>`}
 function addExam(){db.exams.push({id:uid("EX"),name:v("en"),term:v("et"),year:v("ey")});save();toast("Assessment created")}
 function Marks(){let e=db.exams[0]?.id||"",c="Grade 1",s=subjectsFor(c)[0]||"";document.getElementById("content").innerHTML=`<div class="card"><h2>Marks Entry</h2><div class="formgrid">${field("Assessment","mex",e,"select",db.exams.map(x=>x.id))}${field("Class","mclass",c,"select",classes)}${field("Subject","msub",s,"select",subjectsFor(c))}</div><div class="toolbar"><button onclick="loadMarks()">Load Learners</button><button class="success" onclick="saveMarks()">Save Marks</button></div><div id="marktable" class="tablewrap" style="margin-top:15px"></div></div>`}
